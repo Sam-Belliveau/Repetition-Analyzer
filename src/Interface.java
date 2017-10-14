@@ -15,7 +15,7 @@ public class Interface extends JFrame{
 
 	public JLabel outImage = new JLabel();
 	
-	public JButton update = new JButton("Update Image!"), save = new JButton("Save Image!");
+	public JButton update = new JButton("Update Preview!"), save = new JButton("Save Image!");
 	
 	public BufferedImage boardImage;
 	
@@ -37,7 +37,7 @@ public class Interface extends JFrame{
 	public String font = "Consolas";
 	
 	public Interface(){
-		setTitle("Essay Repetition");
+		setTitle("Repetition Analyzer");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		getContentPane().setLayout(null);
 		getContentPane().setBackground(Background);
@@ -54,6 +54,8 @@ public class Interface extends JFrame{
 		TextEnter.setOpaque(true);
 		JScrollPane sp = new JScrollPane(TextEnter); 
 		sp.setBounds(50, 50, 650, 700);
+		sp.setForeground(Text);
+		sp.setBackground(TextBackground);
 		add(sp);
 		
 		update.setBounds(50, 750, 650, 50);
@@ -94,6 +96,16 @@ public class Interface extends JFrame{
 		return resized;
 	}
 	
+	public BufferedImage scaleImageBy(BufferedImage before, int scale){
+		BufferedImage resized = new BufferedImage(before.getWidth()*scale, before.getHeight()*scale, before.getType());
+		Graphics2D g = resized.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR); 
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.drawImage(before, 0, 0, before.getWidth()*scale, before.getHeight()*scale, 0, 0, before.getWidth(), before.getHeight(), null);
+		g.dispose();
+		return resized;
+	}
+	
 	public void updateWordList(){
 		words = new ArrayList<String>();
 		String textInput = TextEnter.getText();
@@ -112,6 +124,9 @@ public class Interface extends JFrame{
 					tempWord = "";
 				}
 			}
+		} if(!tempWord.equals("")){
+			words.add(tempWord);
+			tempWord = "";
 		}
 	}
 	
@@ -128,6 +143,8 @@ public class Interface extends JFrame{
 			}
 			File outputfile = new File("(" + saveName + "...).png");
 			ImageIO.write(unscailedImage, "png", outputfile);
+			
+			Desktop.getDesktop().open(outputfile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -156,11 +173,11 @@ public class Interface extends JFrame{
 				
 				temp = rand.nextInt(3);
 				if(temp == 0){
-					tColor = new Color(255,rand.nextInt(128),rand.nextInt(128)).getRGB();
+					tColor = new Color(rand.nextInt(128)+128, rand.nextInt(128), rand.nextInt(128)).getRGB();
 				} else if (temp == 1){
-					tColor = new Color(rand.nextInt(128), 255,rand.nextInt(128)).getRGB();
+					tColor = new Color(rand.nextInt(128), rand.nextInt(128)+128, rand.nextInt(128)).getRGB();
 				} else if (temp == 2){
-					tColor = new Color(rand.nextInt(128),rand.nextInt(128),255).getRGB();
+					tColor = new Color(rand.nextInt(128), rand.nextInt(128), rand.nextInt(128)+128).getRGB();
 				} else {
 					tColor = new Color(255,255,255).getRGB();
 				}
@@ -173,7 +190,7 @@ public class Interface extends JFrame{
 			}
 		}
 		
-		this.unscailedImage = boardImage;
+		this.unscailedImage = scaleImageBy(boardImage , 4);
 		boardImage = scaleImage(boardImage, imageSize, imageSize);
 		
 		outImage.setIcon(new ImageIcon(boardImage));
